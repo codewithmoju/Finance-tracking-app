@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "BudgetO",
+    "slug": "BudgetO",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "icon": "./src/Drawable/Images/BUDGETO.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./src/Drawable/Images/BUDGETO.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#242442"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/Drawable/Images/BUDGETO.png",
+        "backgroundColor": "#242442"
+      },
+      "package": "com.muhammadmoaiz.BudgetO"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-font"],
+    "extra": {
+      "eas": {
+        "projectId": "e9017fc7-7e59-4c28-80c0-9b4c3bb6e46f"
+      }
+    }
+  }
+}
