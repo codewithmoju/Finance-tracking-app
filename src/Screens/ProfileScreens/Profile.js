@@ -50,7 +50,8 @@ const Profile = () => {
   };
 
   const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissionResult.granted === false) {
       Alert.alert("Permission to access camera roll is required!");
       return;
@@ -190,7 +191,7 @@ const styles = StyleSheet.create({
     color: THEME_COLORS.text.primary,
     fontWeight: "bold",
     textAlign: "center",
-    marginTop: height*0.07,
+    marginTop: height * 0.08,
   },
   scrollView: {
     paddingBottom: SPACING.md,

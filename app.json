@@ -6,13 +6,15 @@
     "orientation": "portrait",
     "icon": "./src/Drawable/Images/BUDGETO.png",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
       "image": "./src/Drawable/Images/BUDGETO.png",
       "resizeMode": "contain",
       "backgroundColor": "#242442"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.muhammadmoaiz.BudgetO"
     },
     "android": {
       "adaptiveIcon": {
