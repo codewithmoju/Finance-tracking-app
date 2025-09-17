@@ -1,65 +1,134 @@
-import { StyleSheet, View, Image } from "react-native";
-import React, { useEffect } from "react";
-import { StatusBar } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { useWindowDimensions } from "react-native";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../../firebaseConfig";
-import { colors, THEME_COLORS } from "../../global/styles";
+import React, { useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Animated,
+  Image,
+  Platform,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { THEME_COLORS, SPACING, TYPOGRAPHY } from '../../global/styles';
+import { Fonts } from '../../../assets/fonts/fonts';
+import { auth } from '../../../firebaseConfig';
 
-const SplashScreen = () => {
-  const navigation = useNavigation();
-  const { width, height } = useWindowDimensions();
+const { width, height } = Dimensions.get('window');
+
+const SplashScreen = ({ navigation }) => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
-    // Listen for authentication state changes
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // If a user is authenticated
-      if (user) {
-        // Navigate to BottomTabs after 2 seconds
-        setTimeout(() => {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "BottomTabs" }],
-          });
-        }, 1000);
-      } else {
-        // If no user is authenticated, navigate to Login after 2 seconds
-        setTimeout(() => {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "Login" }],
-          });
-        }, 2000);
-      }
-    });
+    // Start animations
+    Animated.parallel([
+      // Fade in animation
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      // Scale animation
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 20,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
-    // Cleanup subscription on component unmount
-    return () => unsubscribe();
-  }, [navigation]); // Added navigation to dependency array for better performance
+    // Check auth state after animations
+    const timeout = setTimeout(() => {
+      auth.onAuthStateChanged((user) => {
+        if (user && user.emailVerified) {
+          navigation.replace('Main');
+        } else {
+          navigation.replace('Login');
+        }
+      });
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={"light-content"} />
-      <Image
-        source={require("../../Drawable/Images/BUDGETO.png")}
-        style={styles.image(height, width)}
-      />
+        <Animated.View
+          style={[
+            styles.logoContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
+        >
+          <Image
+            source={require('../../Drawable/Images/BUDGETO.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.title}>BUDGETO</Text>
+        </Animated.View>
+
+        <Animated.View
+          style={[
+            styles.footerContainer,
+            {
+              opacity: fadeAnim,
+            },
+          ]}
+        >
+          <Text style={styles.poweredBy}>powered by</Text>
+          <Text style={styles.studioName}>NAM STUDIOS</Text>
+        </Animated.View>
     </View>
   );
 };
 
-export default SplashScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME_COLORS.primary.light,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#242442',
+    justifyContent: 'center',
+    alignItems: 'center',
+
   },
-  image: (height, width) => ({
-    width: width * 0.7, // Image width is 70% of the screen width
-    height: height * 0.5, // Image height is 50% of the screen height
-  }),
+  gradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoContainer: {
+    alignItems: 'center',
+  },
+  logo: {
+    width: width * 0.5,
+    height: width * 0.5,
+    marginBottom: SPACING.md,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.h1.fontSize,
+    color: THEME_COLORS.text.primary,
+    fontFamily: Fonts.POPPINS_BLACK,
+    letterSpacing: 2,
+  },
+  footerContainer: {
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 50 : 30,
+    alignItems: 'center',
+  },
+  poweredBy: {
+    fontSize: TYPOGRAPHY.caption.fontSize,
+    color: THEME_COLORS.text.secondary,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    marginBottom: SPACING.xs,
+  },
+  studioName: {
+    fontSize: TYPOGRAPHY.h3.fontSize,
+    color: THEME_COLORS.text.primary,
+    fontFamily: Fonts.POPPINS_BOLD,
+    letterSpacing: 1,
+  },
 });
+
+export default SplashScreen;

@@ -1,13 +1,31 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { NavigationContainer } from '@react-navigation/native';
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
 import AuthStack from './AuthStack';
-const RootNavigator = () => {
-  return (
-    <NavigationContainer>
-      <AuthStack/>
-    </NavigationContainer>
-  )
-}
+import BottomTab from './BottomTab';
+import { auth } from '../../../firebaseConfig';
 
-export default RootNavigator
+const Stack = createStackNavigator();
+
+const RootNavigator = () => {
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+
+  React.useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      setIsAuthenticated(!!user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {!isAuthenticated ? (
+        <Stack.Screen name="Auth" component={AuthStack} />
+      ) : (
+        <Stack.Screen name="Main" component={BottomTab} />
+      )}
+    </Stack.Navigator>
+  );
+};
+
+export default RootNavigator;

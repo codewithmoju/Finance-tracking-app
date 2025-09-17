@@ -7,64 +7,104 @@ import {
   Alert,
   StyleSheet,
   Dimensions,
+  ActivityIndicator,
+  Platform,
 } from "react-native";
-import { sendPasswordResetEmail } from "firebase/auth"; // Firebase auth import
-import { auth } from "../../../firebaseConfig"; // Firebase config
-import { THEME_COLORS } from "../../global/styles";
-import { useNavigation } from "@react-navigation/native";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../../../firebaseConfig";
+import { LinearGradient } from "expo-linear-gradient";
+import { colors, THEME_COLORS, SPACING, TYPOGRAPHY } from "../../global/styles";
+import { Fonts } from "../../../assets/fonts/fonts";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
-const ForgotPassword = () => {
-  const [email, setEmail] = useState(""); // State to hold the email input
-  const navigation = useNavigation(); // Hook to navigate between screens
+const ForgotPassword = ({ navigation }) => {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Function to handle password reset
   const handlePasswordReset = async () => {
-    // Check if the email field is empty
     if (!email) {
-      Alert.alert("Error", "Please enter your email address."); // Alert if email is not provided
-      return; // Exit the function if no email
+      Alert.alert("Error", "Please enter your email address");
+      return;
     }
 
     try {
-      // Send password reset email using Firebase
+      setLoading(true);
       await sendPasswordResetEmail(auth, email);
       Alert.alert(
         "Success",
-        "Password reset email has been sent. Please check your inbox." // Alert on success
+        "Password reset email sent! Please check your inbox.",
+        [{ text: "OK", onPress: () => navigation.navigate("Login") }]
       );
     } catch (error) {
-      console.error("Error sending password reset email:", error.message); // Log error to console
-      Alert.alert("Error", error.message); // Alert user with error message
+      let errorMessage = "Failed to send reset email";
+      switch (error.code) {
+        case "auth/invalid-email":
+          errorMessage = "Invalid email address";
+          break;
+        case "auth/user-not-found":
+          errorMessage = "No account found with this email";
+          break;
+        default:
+          errorMessage = error.message;
+      }
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Forgot Password?</Text>
-      <Text style={styles.infoText}>
-        Enter your email below and we'll send you a link to reset your password.
-      </Text>
-      <TextInput
-        placeholder="Enter Your Email" // Placeholder text for email input
-        placeholderTextColor={THEME_COLORS.text.primary} // Color of placeholder text
-        style={styles.input(width, height)} // Style for the input field
-        value={email} // Bind input value to email state
-        onChangeText={setEmail} // Update email state on text change
-      />
-      <TouchableOpacity
-        style={styles.LoginBtn(width, height)} // Style for the button
-        onPress={handlePasswordReset} // Call function on button press
+      <LinearGradient
+        colors={[THEME_COLORS.primary.main, THEME_COLORS.primary.dark]}
+        style={styles.headerGradient}
       >
-        <Text style={styles.btnText(width)}>Send Reset Email</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.LoginBtn(width, height)} // Style for the back button
-        onPress={() => navigation.navigate("Login")} // Navigate to Login screen
-      >
-        <Text style={styles.btnText(width)}>Back to Login</Text>
-      </TouchableOpacity>
+        <Text style={styles.welcomeEmoji}>🔐</Text>
+        <Text style={styles.title}>Reset Password</Text>
+        <Text style={styles.subtitle}>
+          Don't worry! It happens to the best of us. Enter your email and we'll help you get back in. ✨
+        </Text>
+      </LinearGradient>
+
+      <View style={styles.formContainer}>
+        <View style={styles.inputContainer}>
+          <MaterialIcons name="email" size={24} color={THEME_COLORS.accent.main} />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholderTextColor={THEME_COLORS.text.secondary}
+          />
+        </View>
+
+        <TouchableOpacity
+          style={styles.resetButton}
+          onPress={handlePasswordReset}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={THEME_COLORS.text.primary} />
+          ) : (
+            <>
+              <MaterialIcons name="send" size={24} color={THEME_COLORS.text.primary} />
+              <Text style={styles.buttonText}>Send Reset Link</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("Login")}
+        >
+          <MaterialIcons name="arrow-back" size={24} color={THEME_COLORS.text.primary} />
+          <Text style={styles.buttonText}>Back to Login</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -72,53 +112,81 @@ const ForgotPassword = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: width * 0.05,
-    paddingVertical: height * 0.05,
     backgroundColor: THEME_COLORS.primary.main,
   },
-  header: {
-    fontSize: width * 0.08,
-    fontWeight: "bold",
-    color: THEME_COLORS.text.primary,
-    marginBottom: height * 0.03,
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 40,
+    paddingHorizontal: SPACING.xl,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    alignItems: 'center',
   },
-  infoText: {
-    fontSize: width * 0.04,
+  welcomeEmoji: {
+    fontSize: 50,
+    marginBottom: SPACING.md,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.h1.fontSize,
+    color: THEME_COLORS.text.primary,
+    fontFamily: Fonts.POPPINS_BLACK,
+    marginBottom: SPACING.xs,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: TYPOGRAPHY.body1.fontSize,
     color: THEME_COLORS.text.secondary,
-    textAlign: "center",
-    marginBottom: height * 0.03,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    textAlign: 'center',
+    lineHeight: 24,
   },
-  input: (width, height) => ({
-    height: height * 0.07,
-    width: width * 0.9,
+  formContainer: {
+    flex: 1,
+    padding: SPACING.xl,
+    justifyContent: 'center',
+    gap: SPACING.lg,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: THEME_COLORS.background.card,
-    color: THEME_COLORS.text.primary,
     borderRadius: 10,
-    padding: 10,
+    paddingHorizontal: SPACING.md,
+    height: 55,
     borderWidth: 1,
-    margin: 20,
-    borderColor: THEME_COLORS.secondary.main,
-    elevation: 5,
-  }),
-  LoginBtn: (width, height) => ({
-    width: width * 0.9,
-    height: height * 0.07,
+    borderColor: THEME_COLORS.accent.main,
+  },
+  input: {
+    flex: 1,
+    color: THEME_COLORS.text.primary,
+    marginLeft: SPACING.sm,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    fontSize: TYPOGRAPHY.body1.fontSize,
+  },
+  resetButton: {
     backgroundColor: THEME_COLORS.accent.main,
     borderRadius: 20,
-    alignSelf: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-    elevation: 5,
-  }),
-  btnText: (width) => ({
-    fontSize: width * 0.05,
+    height: 55,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginTop: SPACING.xl,
+  },
+  backButton: {
+    backgroundColor: THEME_COLORS.accent.dark,
+    borderRadius: 20,
+    height: 55,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  buttonText: {
+    fontSize: TYPOGRAPHY.h3.fontSize,
     color: THEME_COLORS.text.primary,
-    textAlign: "center",
-    fontWeight: 'bold',
-  }),
+    fontFamily: Fonts.POPPINS_EXTRABOLD,
+  },
 });
 
-export default ForgotPassword; // Export the component for use in other parts of the app
+export default ForgotPassword;

@@ -1,34 +1,70 @@
-import React from "react";
-import { createStackNavigator } from "@react-navigation/stack";
-import Transactions from "../TransactionScreens/Transactions";
-import AddTransaction from "../TransactionScreens/AddTransaction";
-import Categories from "../TransactionScreens/Categories";
-import EditTransaction from "../TransactionScreens/EditTransaction";
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import { Platform } from 'react-native';
+import { THEME_COLORS, colors } from '../../global/styles';
+import Transactions from '../TransactionScreens/Transactions';
+import AddTransaction from '../TransactionScreens/AddTransaction';
+import EditTransaction from '../TransactionScreens/EditTransaction';
+import Categories from '../TransactionScreens/Categories';
+
+const Stack = createStackNavigator();
+
 const TransactionStack = () => {
-  const TransactionStack = createStackNavigator();
   return (
-    <TransactionStack.Navigator initialRouteName="BottomTabs">
-      <TransactionStack.Screen
-        name="Transaction"
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerTransparent: true,
+        headerStyle: {
+          backgroundColor: 'transparent',
+        },
+        headerTitleStyle: {
+          color: colors.white,
+          fontSize: 18,
+          fontFamily: 'Poppins-SemiBold',
+        },
+        headerTintColor: colors.white,
+        headerShadowVisible: false,
+        cardStyle: {
+          backgroundColor: colors.richBlack,
+        },
+        cardStyleInterpolator: ({ current: { progress } }) => ({
+          cardStyle: {
+            opacity: progress,
+          },
+        }),
+      }}
+    >
+      <Stack.Screen 
+        name="Transactions" 
         component={Transactions}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+        }}
       />
-      <TransactionStack.Screen
-        name="EditTransaction"
-        component={EditTransaction}
-        options={{ headerShown: false }}
-      />
-      <TransactionStack.Screen
-        name="AddTransaction"
+      <Stack.Screen 
+        name="AddTransaction" 
         component={AddTransaction}
-        options={{ headerShown: false }}
+        options={{
+          title: 'Add Transaction',
+          presentation: 'modal',
+        }}
       />
-      <TransactionStack.Screen
-        name="Categories"
+      <Stack.Screen 
+        name="EditTransaction" 
+        component={EditTransaction}
+        options={{
+          title: 'Edit Transaction',
+        }}
+      />
+      <Stack.Screen 
+        name="Categories" 
         component={Categories}
-        options={{ headerShown: false }}
+        options={{
+          title: 'Categories',
+        }}
       />
-    </TransactionStack.Navigator>
+    </Stack.Navigator>
   );
 };
 

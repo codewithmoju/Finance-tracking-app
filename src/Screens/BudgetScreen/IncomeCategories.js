@@ -15,6 +15,7 @@ import { auth, db } from "../../../firebaseConfig"; // Ensure firebase is config
 import { PieChart } from "react-native-chart-kit";
 import HomeHeader from "../../Components/HomeHeader";
 import { colors } from "../../global/styles";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -210,7 +211,7 @@ const IncomeCategories = () => {
             visible={isModalVisible}
             onRequestClose={() => setIsModalVisible(false)}
           >
-            <View style={styles.modalContainer}>
+            <GestureHandlerRootView style={styles.modalContainer}>
               <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>
                   Income Transactions for {selectedIncomeCategory?.name}
@@ -234,7 +235,7 @@ const IncomeCategories = () => {
                   <Text style={styles.closeButtonText}>Close</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </GestureHandlerRootView>
           </Modal>
         </>
       )}

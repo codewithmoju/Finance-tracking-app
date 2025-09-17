@@ -15,6 +15,7 @@ import { auth, db } from "../../../firebaseConfig";
 import { PieChart } from "react-native-chart-kit";
 import { colors, THEME_COLORS,SPACING,TYPOGRAPHY } from "../../global/styles";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -211,7 +212,7 @@ const Categories = () => {
             visible={modalVisible}
             onRequestClose={() => setModalVisible(false)}
           >
-            <View style={styles.modalContainer}>
+            <GestureHandlerRootView style={styles.modalContainer}>
               <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>
                   Transactions for {selectedCategory?.name}
@@ -235,7 +236,7 @@ const Categories = () => {
                   <Text style={styles.closeButtonText}>Close</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </GestureHandlerRootView>
           </Modal>
         </>
       )}

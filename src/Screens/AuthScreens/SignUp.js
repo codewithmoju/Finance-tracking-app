@@ -1,4 +1,4 @@
-// Firebase imports
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,34 +6,27 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
+  Dimensions,
+  Platform,
 } from "react-native";
-import React, { useState, useEffect } from "react";
-import { colors } from "../../global/styles";
-import { Fonts, loadFonts } from "../../../assets/fonts/fonts";
-import { useNavigation } from "@react-navigation/native";
-import { useWindowDimensions } from "react-native";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth"; // Email verification import
-import { auth, db } from "../../../firebaseConfig"; // Your Firebase config import
-import { doc, setDoc } from "firebase/firestore"; // Firestore import
-import { THEME_COLORS } from "../../global/styles"; // Import theme colors
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { auth, db } from "../../../firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
+import { LinearGradient } from "expo-linear-gradient";
+import { colors, THEME_COLORS, SPACING, TYPOGRAPHY } from "../../global/styles";
+import { Fonts } from "../../../assets/fonts/fonts";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-const SignUp = () => {
-  const navigation = useNavigation();
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+const { width } = Dimensions.get("window");
+
+const SignUp = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const { width, height } = useWindowDimensions();
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  
-
-  // Toggle password visibility
-  const toggleSecureEntry = () => {
-    setSecureTextEntry(!secureTextEntry);
-  };
-
-  // Form validation
   const validateForm = () => {
     const emailRegex = /\S+@\S+\.\S+/;
     if (username.length < 3) {
@@ -51,197 +44,272 @@ const SignUp = () => {
     return true;
   };
 
-  // Save user data in Firestore
   const saveUserData = async (userId) => {
     try {
-      // Save user information in Firestore under the 'users' collection
       await setDoc(doc(db, "users", userId), {
         username: username,
         email: email,
-        createdAt: new Date(), // Store the current date and time
+        createdAt: new Date().toISOString(),
+        settings: {
+          currency: "USD",
+          notifications: true,
+          biometric: false
+        }
       });
-      console.log("User data saved to Firestore");
     } catch (error) {
-      // Handle errors during Firestore data saving
-      Alert.alert("Error", "Error saving user data: " + error.message);
+      throw new Error("Error saving user data: " + error.message);
     }
   };
 
-  // Handle Sign Up and Send Verification Email
-  const handleSignUp = async () => { // Changed to async for better error handling
-    if (validateForm()) {
-      try {
-        // Create a new user with email and password
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+  const handleSignUp = async () => {
+    if (!validateForm()) return;
 
-        // Save the username to Firestore
-        await saveUserData(user.uid); // Awaiting the saveUserData function for better flow
+    try {
+      setLoading(true);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-        // Send a verification email to the user
-        await sendEmailVerification(auth.currentUser);
-        Alert.alert("Success", "Verification email sent. Please check your inbox.");
-        navigation.navigate("EmailVerification"); // Redirect to verification screen
-      } catch (error) {
-        // Handle errors during sign up or email verification
-        Alert.alert("Error", error.message);
+      await saveUserData(user.uid);
+      await sendEmailVerification(auth.currentUser);
+      
+      Alert.alert(
+        "Success",
+        "Account created successfully! Please verify your email.",
+        [{ text: "OK", onPress: () => navigation.navigate("EmailVerification") }]
+      );
+    } catch (error) {
+      let errorMessage = "Sign up failed";
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          errorMessage = "This email is already registered";
+          break;
+        case "auth/invalid-email":
+          errorMessage = "Invalid email address";
+          break;
+        case "auth/operation-not-allowed":
+          errorMessage = "Email/password accounts are not enabled";
+          break;
+        case "auth/weak-password":
+          errorMessage = "Password is too weak";
+          break;
+        default:
+          errorMessage = error.message;
       }
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    loadFonts().then(() => setFontsLoaded(true));
-  }, []);
-
-  if (!fontsLoaded) {
-    return null;
-  }
 
   return (
-    <View style={styles.container(height)}>
-      <View>
-        <Text style={styles.Logintext(width)}>Sign Up</Text>
-        <Text style={styles.text1(width)}>
-          Welcome To{" "}
-          <Text
-            style={{
-              color: colors.goldAccent,
-              fontFamily: Fonts.POPPINS_BLACK,
-            }}
-          >
-            BUDGETO
-          </Text>{" "}
-          🎉🎉
-        </Text>
-        <Text style={styles.text2(width)}>
-          Create an Account to continue ✨️
-        </Text>
-      </View>
-
-      <View style={styles.TextInputContainer}>
-        <TextInput
-          placeholder="Enter Your Name"
-          placeholderTextColor={colors.silver}
-          style={styles.input(width, height)}
-          value={username}
-          onChangeText={(text) => setUsername(text)}
-        />
-        <TextInput
-          placeholder="Enter Your Email"
-          placeholderTextColor={colors.silver}
-          style={styles.input(width, height)}
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-        />
-        <TextInput
-          placeholder="Enter Password"
-          placeholderTextColor={colors.silver}
-          style={styles.input(width, height)}
-          value={password}
-          secureTextEntry={secureTextEntry}
-          onChangeText={(text) => setPassword(text)}
-        />
-        <TouchableOpacity onPress={toggleSecureEntry}>
-          <Text style={styles.togglePassword}>
-            {secureTextEntry ? "Show Password" : "Hide Password"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        style={styles.LoginBtn(width, height)}
-        onPress={handleSignUp}
+    <View style={styles.container}>
+      <LinearGradient
+        colors={[THEME_COLORS.primary.main, THEME_COLORS.primary.dark]}
+        style={styles.headerGradient}
       >
-        <Text style={styles.btnText(width)}>Sign Up</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.SignUpText(width)}>
-        Already have an account?{" "}
-        <Text
-          style={{ color: colors.goldAccent, textDecorationLine: "underline" }}
-          onPress={() => navigation.navigate("Login")}
-        >
-          Sign In
+        <Text style={styles.welcomeEmoji}>🎉</Text>
+        <Text style={styles.title}>Join BUDGETO</Text>
+        <Text style={styles.subtitle}>
+          Start your journey to better financial management today ✨
         </Text>
-      </Text>
+      </LinearGradient>
+
+      <View style={styles.formContainer}>
+        <View style={styles.inputContainer}>
+          <MaterialIcons name="person" size={24} color={THEME_COLORS.accent.main} />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your name"
+            value={username}
+            onChangeText={setUsername}
+            placeholderTextColor={THEME_COLORS.text.secondary}
+            autoCapitalize="words"
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <MaterialIcons name="email" size={24} color={THEME_COLORS.accent.main} />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholderTextColor={THEME_COLORS.text.secondary}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <MaterialIcons name="lock" size={24} color={THEME_COLORS.accent.main} />
+          <TextInput
+            style={styles.input}
+            placeholder="Choose a password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            placeholderTextColor={THEME_COLORS.text.secondary}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <MaterialIcons
+              name={showPassword ? "visibility" : "visibility-off"}
+              size={24}
+              color={THEME_COLORS.accent.main}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.passwordHint}>
+          🔒 Password must be at least 6 characters
+        </Text>
+
+        <TouchableOpacity
+          style={styles.signupButton}
+          onPress={handleSignUp}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={THEME_COLORS.text.primary} />
+          ) : (
+            <>
+              <MaterialIcons name="person-add" size={24} color={THEME_COLORS.text.primary} />
+              <Text style={styles.signupButtonText}>Create Account</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>OR</Text>
+          <View style={styles.divider} />
+        </View>
+
+        <View style={styles.loginContainer}>
+          <Text style={styles.loginText}>Already have an account? </Text>
+          <TouchableOpacity 
+            style={styles.loginButton}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <Text style={styles.loginLink}>Login Here 👋</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };
 
-export default SignUp;
-
 const styles = StyleSheet.create({
-  container: (height) => ({
+  container: {
     flex: 1,
     backgroundColor: THEME_COLORS.primary.main,
-    justifyContent: "center",
-    paddingVertical: height * 0.1,
-    paddingHorizontal: 20,
-  }),
-  Logintext: (width) => ({
-    fontSize: width * 0.1,
+  },
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 40,
+    paddingHorizontal: SPACING.xl,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    alignItems: 'center',
+  },
+  welcomeEmoji: {
+    fontSize: 50,
+    marginBottom: SPACING.md,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.h1.fontSize,
     color: THEME_COLORS.text.primary,
     fontFamily: Fonts.POPPINS_BLACK,
-    textAlign: "center",
-    marginBottom: 20,
-  }),
-  TextInputContainer: {
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+    marginBottom: SPACING.xs,
+    textAlign: 'center',
   },
-  input: (width, height) => ({
-    height: height * 0.07,
-    width: width * 0.9,
-    backgroundColor: THEME_COLORS.background.card,
-    color: THEME_COLORS.text.primary,
-    borderRadius: 10,
-    padding: 10,
-    borderWidth: 1,
-    margin: 10,
-    borderColor: THEME_COLORS.secondary.main,
-    elevation: 5,
-  }),
-  text1: (width) => ({
-    fontSize: width * 0.05,
-    color: THEME_COLORS.text.primary,
-    fontFamily: Fonts.POPPINS_BOLD,
-    marginLeft: 30,
-  }),
-  text2: (width) => ({
-    fontSize: width * 0.035,
+  subtitle: {
+    fontSize: TYPOGRAPHY.body1.fontSize,
     color: THEME_COLORS.text.secondary,
-    fontFamily: Fonts.POPPINS_MEDIUM,
-    marginLeft: 30,
-  }),
-  LoginBtn: (width, height) => ({
-    width: width * 0.9,
-    height: height * 0.07,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  formContainer: {
+    flex: 1,
+    padding: SPACING.xl,
+    justifyContent: 'center',
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: THEME_COLORS.background.card,
+    borderRadius: 10,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+    height: 55,
+    borderWidth: 1,
+    borderColor: THEME_COLORS.accent.main,
+  },
+  input: {
+    flex: 1,
+    color: THEME_COLORS.text.primary,
+    marginLeft: SPACING.sm,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    fontSize: TYPOGRAPHY.body1.fontSize,
+  },
+  passwordHint: {
+    color: THEME_COLORS.text.secondary,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    fontSize: TYPOGRAPHY.caption.fontSize,
+    marginBottom: SPACING.xl,
+    marginTop: -SPACING.sm,
+    marginLeft: SPACING.sm,
+  },
+  signupButton: {
     backgroundColor: THEME_COLORS.accent.main,
     borderRadius: 20,
-    alignSelf: "center",
+    height: 55,
+    flexDirection: 'row',
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
-    elevation: 5,
-  }),
-  btnText: (width) => ({
-    fontSize: width * 0.06,
+    marginBottom: SPACING.xl,
+    gap: SPACING.sm,
+  },
+  signupButtonText: {
+    fontSize: TYPOGRAPHY.h3.fontSize,
     color: THEME_COLORS.text.primary,
     fontFamily: Fonts.POPPINS_EXTRABOLD,
-    textAlign: "center",
-  }),
-  SignUpText: (width) => ({
-    fontSize: width * 0.04,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.xl,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: THEME_COLORS.text.secondary,
+    opacity: 0.2,
+  },
+  dividerText: {
     color: THEME_COLORS.text.secondary,
+    marginHorizontal: SPACING.md,
     fontFamily: Fonts.POPPINS_MEDIUM,
-    textAlign: "center",
-    margin: 20,
-  }),
-  togglePassword: {
+    fontSize: TYPOGRAPHY.body2.fontSize,
+  },
+  loginContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loginText: {
+    color: THEME_COLORS.text.secondary,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    fontSize: TYPOGRAPHY.body2.fontSize,
+  },
+  loginButton: {
+    backgroundColor: 'transparent',
+  },
+  loginLink: {
     color: THEME_COLORS.accent.main,
-    fontSize: 16,
-    marginVertical: 5,
-    textAlign: "center",
+    fontFamily: Fonts.POPPINS_SEMIBOLD,
+    fontSize: TYPOGRAPHY.body2.fontSize,
   },
 });
+
+export default SignUp;

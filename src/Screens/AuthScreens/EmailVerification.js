@@ -1,92 +1,168 @@
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
-import React from "react";
-import { sendEmailVerification, getAuth } from "firebase/auth";
-import { useNavigation } from "@react-navigation/native";
-import { colors } from "../../global/styles";
-import { useWindowDimensions } from "react-native";
-import { THEME_COLORS } from "../../global/styles";
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  Dimensions,
+  Platform,
+} from "react-native";
+import { sendEmailVerification } from "firebase/auth";
+import { auth } from "../../../firebaseConfig";
+import { LinearGradient } from "expo-linear-gradient";
+import { colors, THEME_COLORS, SPACING, TYPOGRAPHY } from "../../global/styles";
+import { Fonts } from "../../../assets/fonts/fonts";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
-const EmailVerification = () => {
-  // Get the dimensions of the window for responsive design
-  const { width, height } = useWindowDimensions();
-  const navigation = useNavigation();
-  const auth = getAuth();
+const { width } = Dimensions.get("window");
 
-  // Function to resend the verification email
-  const resendVerificationEmail = () => {
-    // Check if the current user is available before sending the email
-    if (auth.currentUser) {
-      sendEmailVerification(auth.currentUser)
-        .then(() => {
-          Alert.alert("Success", "Verification email resent."); // Notify user of success
-        })
-        .catch((error) => {
-          Alert.alert("Error", error.message); // Notify user of error
-        });
-    } else {
-      Alert.alert("Error", "No user is currently logged in."); // Handle case where no user is logged in
+const EmailVerification = ({ navigation }) => {
+  const [loading, setLoading] = useState(false);
+
+  const resendVerificationEmail = async () => {
+    if (!auth.currentUser) {
+      Alert.alert("Error", "No user is currently logged in");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await sendEmailVerification(auth.currentUser);
+      Alert.alert(
+        "Success",
+        "Verification email sent! Please check your inbox.",
+        [{ text: "OK" }]
+      );
+    } catch (error) {
+      Alert.alert("Error", "Failed to send verification email");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container(height)}>
-      <Text style={styles.title(width)}>Verify Your Email</Text>
-      <Text style={styles.text(width)}>
-        A verification link has been sent to your email. Please verify your
-        email to proceed.
-      </Text>
-      <TouchableOpacity
-        style={styles.btn(width, height)}
-        onPress={resendVerificationEmail}
+    <View style={styles.container}>
+      <LinearGradient
+        colors={[THEME_COLORS.primary.main, THEME_COLORS.primary.dark]}
+        style={styles.headerGradient}
       >
-        <Text style={styles.btnText(width)}>Resend Verification Email</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.btn(width, height)}
-        onPress={() => navigation.navigate("Login")}
-      >
-        <Text style={styles.btnText(width)}>Back to Login</Text>
-      </TouchableOpacity>
+        <Text style={styles.welcomeEmoji}>✉️</Text>
+        <Text style={styles.title}>Almost There!</Text>
+        <Text style={styles.subtitle}>
+          We've sent you a verification email. Please check your inbox and click the link to activate your account. ✨
+        </Text>
+      </LinearGradient>
+
+      <View style={styles.formContainer}>
+        <View style={styles.infoContainer}>
+          <Ionicons name="mail-unread" size={40} color={THEME_COLORS.accent.main} />
+          <Text style={styles.infoText}>
+            Didn't receive the email? Check your spam folder or request a new verification link below.
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.resendButton}
+          onPress={resendVerificationEmail}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={THEME_COLORS.text.primary} />
+          ) : (
+            <>
+              <MaterialIcons name="refresh" size={24} color={THEME_COLORS.text.primary} />
+              <Text style={styles.buttonText}>Resend Verification Email</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("Login")}
+        >
+          <MaterialIcons name="arrow-back" size={24} color={THEME_COLORS.text.primary} />
+          <Text style={styles.buttonText}>Back to Login</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
-export default EmailVerification;
-
 const styles = StyleSheet.create({
-  container: (height) => ({
+  container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
     backgroundColor: THEME_COLORS.primary.main,
-    paddingVertical: height * 0.1,
-  }),
-  title: (width) => ({
-    fontSize: width * 0.1,
+  },
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 40,
+    paddingHorizontal: SPACING.xl,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    alignItems: 'center',
+  },
+  welcomeEmoji: {
+    fontSize: 50,
+    marginBottom: SPACING.md,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.h1.fontSize,
     color: THEME_COLORS.text.primary,
-    fontFamily: "Poppins-Bold",
-    textAlign: "center",
-    marginBottom: 20,
-  }),
-  text: (width) => ({
-    fontSize: width * 0.05,
+    fontFamily: Fonts.POPPINS_BLACK,
+    marginBottom: SPACING.xs,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: TYPOGRAPHY.body1.fontSize,
     color: THEME_COLORS.text.secondary,
-    textAlign: "center",
-    marginBottom: 30,
-  }),
-  btn: (width, height) => ({
+    fontFamily: Fonts.POPPINS_REGULAR,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  formContainer: {
+    flex: 1,
+    padding: SPACING.xl,
+    justifyContent: 'center',
+    gap: SPACING.lg,
+  },
+  infoContainer: {
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginBottom: SPACING.xl,
+  },
+  infoText: {
+    fontSize: TYPOGRAPHY.body1.fontSize,
+    color: THEME_COLORS.text.secondary,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  resendButton: {
     backgroundColor: THEME_COLORS.accent.main,
-    paddingVertical: height * 0.02,
-    paddingHorizontal: width * 0.2,
-    borderRadius: 10,
-    marginVertical: 10,
-    elevation: 5,
-  }),
-  btnText: (width) => ({
-    fontSize: width * 0.05,
+    borderRadius: 20,
+    height: 55,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  backButton: {
+    backgroundColor: THEME_COLORS.accent.dark,
+    borderRadius: 20,
+    height: 55,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  buttonText: {
+    fontSize: TYPOGRAPHY.h3.fontSize,
     color: THEME_COLORS.text.primary,
-    fontFamily: "Poppins-Bold",
-    textAlign: "center",
-  }),
+    fontFamily: Fonts.POPPINS_EXTRABOLD,
+  },
 });
+
+export default EmailVerification;

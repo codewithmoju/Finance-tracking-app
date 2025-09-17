@@ -1,247 +1,360 @@
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
   View,
   TextInput,
   TouchableOpacity,
-  Alert
+  Alert,
+  ActivityIndicator,
+  Dimensions,
+  Platform,
 } from "react-native";
-import React, { useState, useEffect } from "react";
-import { colors } from "../../global/styles";
-import { Fonts, loadFonts } from "../../../assets/fonts/fonts";
-import { useNavigation } from "@react-navigation/native";
-import { useWindowDimensions } from "react-native";
-import { signInWithEmailAndPassword } from "firebase/auth"; // Firebase auth import
-import { auth } from "../../../firebaseConfig"; // Firebase config
-import { THEME_COLORS } from "../../global/styles";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "../../../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import { LinearGradient } from "expo-linear-gradient";
+import { colors, THEME_COLORS, SPACING, TYPOGRAPHY } from "../../global/styles";
+import { Fonts } from "../../../assets/fonts/fonts";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as LocalAuthentication from 'expo-local-authentication';
+import { commonStyles } from "../../global/styles";
 
-const Login = () => {
-  const navigation = useNavigation();
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+const { width } = Dimensions.get("window");
+
+const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const { width, height } = useWindowDimensions();
-
-  const toggleSecureEntry = () => {
-    setSecureTextEntry(!secureTextEntry);
-  };
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [biometricSupported, setBiometricSupported] = useState(false);
+  const [savedCredentials, setSavedCredentials] = useState(null);
 
   useEffect(() => {
-    loadFonts().then(() => setFontsLoaded(true));
+    checkBiometricSupport();
+    loadSavedCredentials();
   }, []);
 
-  if (!fontsLoaded) {
-    return null; // Return null while fonts are loading
-  }
-  const handleLogin = () => {
-    // Regular expression for validating email format
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Check if email and password fields are filled
-    if (email === "" || password === "") {
-      Alert.alert("Error", "Please fill in all fields"); // Alert if fields are empty
-      return; // Exit the function if validation fails
+  const checkBiometricSupport = async () => {
+    try {
+      const compatible = await LocalAuthentication.hasHardwareAsync();
+      const enrolled = await LocalAuthentication.isEnrolledAsync();
+      setBiometricSupported(compatible && enrolled);
+    } catch (error) {
+      console.error('Error checking biometric support:', error);
     }
+  };
 
-    // Validate email format
-    if (!emailPattern.test(email)) {
-      Alert.alert("Error", "Please enter a valid email address"); // Alert for invalid email
-      return; // Exit the function if validation fails
+  const loadSavedCredentials = async () => {
+    try {
+      const credentials = await AsyncStorage.getItem('userCredentials');
+      if (credentials) {
+        setSavedCredentials(JSON.parse(credentials));
+      }
+    } catch (error) {
+      console.error('Error loading credentials:', error);
     }
+  };
 
-    // Validate password length
-    if (password.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters long"); // Alert for short password
-      return; // Exit the function if validation fails
-    }
+  const handleBiometricAuth = async () => {
+    try {
+      if (!savedCredentials) {
+        return;
+      }
 
-    // Attempt to sign in with Firebase authentication
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user; // Get the user object from the credential
-
-        // Check if the user's email is verified
-        if (user.emailVerified) {
-          console.log("Logged in as:", user.email); // Log the user's email
-          navigation.navigate("BottomTabs"); // Redirect to Home after successful login
-        } else {
-          // Alert if the email is not verified
-          Alert.alert(
-            "Email Not Verified",
-            "Please verify your email address before logging in."
-          );
-          // Optionally, resend the verification email
-          user
-            .sendEmailVerification()
-            .then(() => {
-              Alert.alert(
-                "Verification Email Sent",
-                "A new verification email has been sent to your email address."
-              ); // Alert for sent verification email
-            })
-            .catch((error) => {
-              console.error("Error sending email verification", error); // Log error if sending fails
-            });
-        }
-      })
-      .catch((error) => {
-        // Handle specific error messages
-        let errorMessage = ""; // Initialize error message variable
-        switch (error.code) {
-          case "auth/invalid-email":
-            errorMessage = "Invalid email format."; // Error for invalid email
-            break;
-          case "auth/wrong-password":
-            errorMessage = "Incorrect password."; // Error for wrong password
-            break;
-          case "auth/user-not-found":
-            errorMessage = "No account found with this email."; // Error for non-existent account
-            break;
-          case "auth/too-many-requests":
-            errorMessage = "Too many failed attempts. Please try again later."; // Error for too many attempts
-            break;
-          default:
-            errorMessage = error.message; // Default error message
-        }
-        Alert.alert("Login Error", errorMessage); // Alert for login errors
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Login with biometrics',
+        fallbackLabel: 'Use password',
       });
+
+      if (result.success) {
+        await handleLogin(savedCredentials.email, savedCredentials.password);
+      }
+    } catch (error) {
+      console.error('Biometric auth error:', error);
+      Alert.alert('Error', 'Biometric authentication failed');
+    }
+  };
+
+  const handleLogin = async (loginEmail = email, loginPassword = password) => {
+    if (!loginEmail || !loginPassword) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        loginEmail,
+        loginPassword
+      );
+
+      // Check if biometric login is enabled for this user
+      const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+      const userData = userDoc.data();
+      
+      if (userData?.settings?.biometric) {
+        // Save credentials for biometric login
+        await AsyncStorage.setItem('userCredentials', JSON.stringify({
+          email: loginEmail,
+          password: loginPassword
+        }));
+      }
+
+      navigation.replace("Main");
+    } catch (error) {
+      let errorMessage = "Login failed";
+      switch (error.code) {
+        case "auth/invalid-email":
+          errorMessage = "Invalid email address";
+          break;
+        case "auth/user-disabled":
+          errorMessage = "This account has been disabled";
+          break;
+        case "auth/user-not-found":
+          errorMessage = "User not found";
+          break;
+        case "auth/wrong-password":
+          errorMessage = "Invalid password";
+          break;
+        default:
+          errorMessage = error.message;
+      }
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <View style={styles.container(height)}>
-      <View>
-        <Text style={styles.Logintext(width)}>Login</Text>
-        <Text style={styles.text1(width)}>Welcome Back 🎉🎉</Text>
-        <Text style={styles.text2(width)}>Good to see you back ✨️</Text>
-      </View>
-
-      <View style={styles.TextInputContainer}>
-        <TextInput
-          placeholder="Enter Your Email"
-          placeholderTextColor={colors.white}
-          style={styles.input(width, height)}
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-        />
-        <TextInput
-          placeholder="Enter Password"
-          placeholderTextColor={colors.white}
-          style={styles.input(width, height)}
-          value={password}
-          secureTextEntry={secureTextEntry}
-          onChangeText={(text) => setPassword(text)}
-        />
-      </View>
-
-      <View style={styles.textContainer(width)}>
-        <Text style={styles.text3(width)} onPress={toggleSecureEntry}>
-          {secureTextEntry ? "Show Password" : "Hide Password"}
-        </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
-          <Text style={styles.text3(width)}>Forgot Password?</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        style={styles.LoginBtn(width, height)}
-        onPress={handleLogin} // Use the login function
+    <View style={styles.container}>
+      <LinearGradient
+        colors={[THEME_COLORS.primary.main, THEME_COLORS.primary.dark]}
+        style={styles.headerGradient}
       >
-        <Text style={styles.btnText(width)}>Login</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.SignUpText(width)}>
-        Don't have an account?{" "}
-        <Text
-          style={{ color: colors.goldAccent, textDecorationLine: "underline" }}
-          onPress={() => navigation.navigate("SignUp")}
-        >
-          Sign Up
+        <Text style={styles.welcomeEmoji}>👋</Text>
+        <Text style={styles.title}>Welcome Back!</Text>
+        <Text style={styles.subtitle}>
+          Let's help you manage your finances better ✨
         </Text>
-      </Text>
+      </LinearGradient>
+
+      <View style={styles.formContainer}>
+        {biometricSupported && savedCredentials && (
+          <TouchableOpacity
+            style={styles.biometricButton}
+            onPress={handleBiometricAuth}
+          >
+            <MaterialIcons name="fingerprint" size={30} color={THEME_COLORS.text.primary} />
+            <Text style={styles.biometricText}>
+              Quick Login with Biometrics 🔐
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        <View style={styles.inputContainer}>
+          <MaterialIcons name="email" size={24} color={THEME_COLORS.accent.main} />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholderTextColor={THEME_COLORS.text.secondary}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <MaterialIcons name="lock" size={24} color={THEME_COLORS.accent.main} />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            placeholderTextColor={THEME_COLORS.text.secondary}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <MaterialIcons
+              name={showPassword ? "visibility" : "visibility-off"}
+              size={24}
+              color={THEME_COLORS.accent.main}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          style={styles.forgotPassword}
+          onPress={() => navigation.navigate("ForgotPassword")}
+        >
+          <Text style={styles.forgotPasswordText}>Forgot Password? 🔑</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={() => handleLogin()}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={THEME_COLORS.text.primary} />
+          ) : (
+            <>
+              <MaterialIcons name="login" size={24} color={THEME_COLORS.text.primary} />
+              <Text style={styles.loginButtonText}>Login</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>OR</Text>
+          <View style={styles.divider} />
+        </View>
+
+        <View style={styles.signupContainer}>
+          <Text style={styles.signupText}>Don't have an account? </Text>
+          <TouchableOpacity 
+            style={styles.signupButton}
+            onPress={() => navigation.navigate("SignUp")}
+          >
+            <Text style={styles.signupLink}>Create Account ✨</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };
 
-export default Login;
-
 const styles = StyleSheet.create({
-  container: (height) => ({
+  container: {
     flex: 1,
     backgroundColor: THEME_COLORS.primary.main,
-    justifyContent: "center",
-    paddingVertical: height * 0.1,
-    paddingHorizontal: 20,
-  }),
-  Logintext: (width) => ({
-    fontSize: width * 0.1,
+  },
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 40,
+    paddingHorizontal: SPACING.xl,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    alignItems: 'center',
+  },
+  welcomeEmoji: {
+    fontSize: 50,
+    marginBottom: SPACING.md,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.h1.fontSize,
     color: THEME_COLORS.text.primary,
     fontFamily: Fonts.POPPINS_BLACK,
-    textAlign: "center",
-  }),
-  TextInputContainer: {
-    width: "100%",
+    marginBottom: SPACING.xs,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: TYPOGRAPHY.body1.fontSize,
+    color: THEME_COLORS.text.secondary,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    textAlign: 'center',
+  },
+  formContainer: {
+    flex: 1,
+    padding: SPACING.xl,
+    justifyContent: 'center',
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: THEME_COLORS.background.card,
+    borderRadius: 10,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+    height: 55,
+    borderWidth: 1,
+    borderColor: THEME_COLORS.accent.main,
+  },
+  input: {
+    flex: 1,
+    color: THEME_COLORS.text.primary,
+    marginLeft: SPACING.sm,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    fontSize: TYPOGRAPHY.body1.fontSize,
+  },
+  forgotPassword: {
+    alignSelf: "flex-end",
+    marginBottom: SPACING.xl,
+  },
+  forgotPasswordText: {
+    color: THEME_COLORS.accent.main,
+    fontFamily: Fonts.POPPINS_MEDIUM,
+    fontSize: TYPOGRAPHY.body2.fontSize,
+  },
+  loginButton: {
+    backgroundColor: THEME_COLORS.accent.main,
+    borderRadius: 20,
+    height: 55,
+    flexDirection: 'row',
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: SPACING.xl,
+    gap: SPACING.sm,
+  },
+  loginButtonText: {
+    fontSize: TYPOGRAPHY.h3.fontSize,
+    color: THEME_COLORS.text.primary,
+    fontFamily: Fonts.POPPINS_EXTRABOLD,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.xl,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: THEME_COLORS.text.secondary,
+    opacity: 0.2,
+  },
+  dividerText: {
+    color: THEME_COLORS.text.secondary,
+    marginHorizontal: SPACING.md,
+    fontFamily: Fonts.POPPINS_MEDIUM,
+    fontSize: TYPOGRAPHY.body2.fontSize,
+  },
+  signupContainer: {
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
   },
-  input: (width, height) => ({
-    height: height * 0.07,
-    width: width * 0.9,
-    backgroundColor: THEME_COLORS.background.card,
-    color: THEME_COLORS.text.primary,
-    borderRadius: 10,
-    padding: 10,
-    borderWidth: 1,
-    margin: 20,
-    borderColor: THEME_COLORS.secondary.main,
-    elevation: 5,
-  }),
-  text1: (width) => ({
-    fontSize: width * 0.07,
-    color: colors.white,
-    fontFamily: Fonts.POPPINS_BOLD,
-    marginLeft: 30,
-  }),
-  text2: (width) => ({
-    fontSize: width * 0.04,
-    color: colors.white,
-    fontFamily: Fonts.POPPINS_MEDIUM,
-    marginLeft: 30,
-  }),
-  text3: (width) => ({
-    fontSize: width * 0.03,
-    color: colors.white,
-    fontFamily: Fonts.POPPINS_MEDIUM,
-  }),
-  textContainer: (width) => ({
-    alignSelf: "center",
-    width: "90%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  }),
-  LoginBtn: (width, height) => ({
-    width: width * 0.9,
-    height: height * 0.07,
+  signupText: {
+    color: THEME_COLORS.text.secondary,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    fontSize: TYPOGRAPHY.body2.fontSize,
+  },
+  signupButton: {
+    backgroundColor: 'transparent',
+  },
+  signupLink: {
+    color: THEME_COLORS.accent.main,
+    fontFamily: Fonts.POPPINS_SEMIBOLD,
+    fontSize: TYPOGRAPHY.body2.fontSize,
+  },
+  biometricButton: {
     backgroundColor: THEME_COLORS.accent.main,
     borderRadius: 20,
-    alignSelf: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-    elevation: 5,
-  }),
-  btnText: (width) => ({
-    fontSize: width * 0.06,
+    height: 55,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.xl,
+    gap: SPACING.sm,
+  },
+  biometricText: {
     color: THEME_COLORS.text.primary,
-    fontFamily: Fonts.POPPINS_EXTRABOLD,
-    textAlign: "center",
-  }),
-  SignUpText: (width) => ({
-    fontSize: width * 0.04,
-    color: THEME_COLORS.text.secondary,
     fontFamily: Fonts.POPPINS_MEDIUM,
-    textAlign: "center",
-    margin: 20,
-  }),
+    fontSize: TYPOGRAPHY.body1.fontSize,
+  },
 });
+
+export default Login;

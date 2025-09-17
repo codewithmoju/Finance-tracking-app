@@ -1,34 +1,70 @@
-import React from "react";
-import { createStackNavigator } from "@react-navigation/stack";
-import Income from "../BudgetScreen/Income";
-import AddIncome from "../BudgetScreen/AddIncome";
-import IncomeCategories from "../BudgetScreen/IncomeCategories";
-import EditIncome from "../BudgetScreen/EditIncome";
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import { Platform } from 'react-native';
+import { THEME_COLORS, colors } from '../../global/styles';
+import Income from '../BudgetScreen/Income';
+import AddIncome from '../BudgetScreen/AddIncome';
+import EditIncome from '../BudgetScreen/EditIncome';
+import IncomeCategories from '../BudgetScreen/IncomeCategories';
+
+const Stack = createStackNavigator();
+
 const IncomeStack = () => {
-  const IncomeStack = createStackNavigator();
   return (
-    <IncomeStack.Navigator initialRouteName="BottomTabs">
-      <IncomeStack.Screen
-        name="Income"
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerTransparent: true,
+        headerStyle: {
+          backgroundColor: 'transparent',
+        },
+        headerTitleStyle: {
+          color: colors.white,
+          fontSize: 18,
+          fontFamily: 'Poppins-SemiBold',
+        },
+        headerTintColor: colors.white,
+        headerShadowVisible: false,
+        cardStyle: {
+          backgroundColor: colors.richBlack,
+        },
+        cardStyleInterpolator: ({ current: { progress } }) => ({
+          cardStyle: {
+            opacity: progress,
+          },
+        }),
+      }}
+    >
+      <Stack.Screen 
+        name="Income" 
         component={Income}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+        }}
       />
-      <IncomeStack.Screen
-        name="AddIncome"
+      <Stack.Screen 
+        name="AddIncome" 
         component={AddIncome}
-        options={{ headerShown: false }}
+        options={{
+          title: 'Add Income',
+          presentation: 'modal',
+        }}
       />
-      <IncomeStack.Screen
-        name="IncomeCategories"
-        component={IncomeCategories}
-        options={{ headerShown: false }}
-      />
-      <IncomeStack.Screen
-        name="EditIncome"
+      <Stack.Screen 
+        name="EditIncome" 
         component={EditIncome}
-        options={{ headerShown: false }}
+        options={{
+          title: 'Edit Income',
+        }}
       />
-    </IncomeStack.Navigator>
+      <Stack.Screen 
+        name="IncomeCategories" 
+        component={IncomeCategories}
+        options={{
+          title: 'Categories',
+        }}
+      />
+    </Stack.Navigator>
   );
 };
 

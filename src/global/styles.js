@@ -1,37 +1,25 @@
 // styles.js
 
-import { Dimensions, Platform, StyleSheet } from 'react-native';
+import { Dimensions } from 'react-native';
+import { Fonts } from '../../assets/fonts/fonts';
+
 const { width, height } = Dimensions.get('window');
-// styles.js
 
+// Colors
 export const colors = {
-  // Background color: Creates a luxurious and premium feel for the app background.
   richBlack: "#0D0D0D",
-
-  // Secondary background or section dividers: Use for cards, headers, or different sections.
   darkCharcoal: "#1A1A1A",
-
-  // Input fields and text boxes: Provides subtle contrast for text fields and navigation bars.
   gunmetalGray: "#333333",
-
-  // Secondary text and icons: For less prominent text and icons across the UI.
   slateGray: "#4D4D4D",
-
-  // Tertiary elements and borders: Use for borders around buttons, cards, and input fields.
   silver: "#999999",
-
-  // Accent color for CTAs (Call to Action) and highlights: Ideal for buttons and selected elements.
   goldAccent: "#FFD700",
-
-  // Primary text color: Ensures maximum readability against the dark background.
   white: "#FFFFFF",
-  lightGray: "#B0B0B0", // Subtext, secondary text
-  deepPurple: "#6A0DAD", // Balance card color
-  greenAccent: "#2ECC71", // Income card and success color
-  redAccent: "#E74C3C", // Expense card and warning color
+  lightGray: "#B0B0B0",
+  deepPurple: "#6A0DAD",
+  greenAccent: "#2ECC71",
+  redAccent: "#E74C3C",
   shadowColor: "rgba(0, 0, 0, 0.1)",
 };
-
 
 // Theme Colors
 export const THEME_COLORS = {
@@ -39,7 +27,7 @@ export const THEME_COLORS = {
     main: '#1A1A2E',
     light: '#242442',
     dark: '#12121E',
-  }, 
+  },
   secondary: {
     main: '#16CAC9',
     light: '#1CE8E7',
@@ -87,311 +75,143 @@ export const THEME_COLORS = {
   }
 };
 
-// Spacing Constants
-export const SPACING = {
-  xs: width * 0.02,  // 2%
-  sm: width * 0.03,  // 3%
-  md: width * 0.04,  // 4%
-  lg: width * 0.05,  // 5%
-  xl: width * 0.07   // 7%
-};
-
-// Typography Scale
+// Typography
 export const TYPOGRAPHY = {
   h1: {
     fontSize: width * 0.08,
-    lineHeight: width * 0.11,
+    fontFamily: Fonts.POPPINS_BOLD,
+    lineHeight: width * 0.12,
   },
   h2: {
     fontSize: width * 0.06,
+    fontFamily: Fonts.POPPINS_SEMIBOLD,
     lineHeight: width * 0.09,
   },
   h3: {
     fontSize: width * 0.05,
+    fontFamily: Fonts.POPPINS_MEDIUM,
     lineHeight: width * 0.075,
+  },
+  h4: {
+    fontSize: width * 0.04,
+    fontFamily: Fonts.POPPINS_MEDIUM,
+    lineHeight: width * 0.06,
+  },
+  subtitle1: {
+    fontSize: width * 0.045,
+    fontFamily: Fonts.POPPINS_MEDIUM,
+    lineHeight: width * 0.0675,
+  },
+  subtitle2: {
+    fontSize: width * 0.035,
+    fontFamily: Fonts.POPPINS_MEDIUM,
+    lineHeight: width * 0.0525,
   },
   body1: {
     fontSize: width * 0.04,
+    fontFamily: Fonts.POPPINS_REGULAR,
     lineHeight: width * 0.06,
   },
   body2: {
     fontSize: width * 0.035,
+    fontFamily: Fonts.POPPINS_REGULAR,
     lineHeight: width * 0.0525,
+  },
+  button: {
+    fontSize: width * 0.04,
+    fontFamily: Fonts.POPPINS_MEDIUM,
+    lineHeight: width * 0.06,
   },
   caption: {
     fontSize: width * 0.03,
+    fontFamily: Fonts.POPPINS_REGULAR,
     lineHeight: width * 0.045,
-  }
+  },
+  overline: {
+    fontSize: width * 0.025,
+    fontFamily: Fonts.POPPINS_MEDIUM,
+    lineHeight: width * 0.0375,
+    textTransform: 'uppercase',
+  },
+};
+
+// Spacing
+export const SPACING = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 40,
 };
 
 // Common Styles
-export const commonStyles = StyleSheet.create({
-  // Layout Styles
+export const commonStyles = {
   container: {
     flex: 1,
     backgroundColor: THEME_COLORS.primary.main,
-  },
-  centerContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  spaceBetween: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  center: {
+    justifyContent: 'center',
     alignItems: 'center',
   },
-
-  // Card Styles
-  card: {
-    backgroundColor: THEME_COLORS.background.card,
-    borderRadius: 15,
-    padding: SPACING.md,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-      },
-      android: {
-        elevation: 5,
-      },
-    }),
-  },
-  glassMorphism: {
-    backgroundColor: THEME_COLORS.background.card,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 15,
-  },
-
-  // Text Styles
   heading1: {
     ...TYPOGRAPHY.h1,
     color: THEME_COLORS.text.primary,
-    fontFamily: 'Poppins-Bold',
   },
   heading2: {
     ...TYPOGRAPHY.h2,
     color: THEME_COLORS.text.primary,
-    fontFamily: 'Poppins-SemiBold',
   },
   heading3: {
     ...TYPOGRAPHY.h3,
     color: THEME_COLORS.text.primary,
-    fontFamily: 'Poppins-Medium',
+  },
+  subtitle1: {
+    ...TYPOGRAPHY.subtitle1,
+    color: THEME_COLORS.text.primary,
+  },
+  subtitle2: {
+    ...TYPOGRAPHY.subtitle2,
+    color: THEME_COLORS.text.primary,
   },
   bodyText1: {
     ...TYPOGRAPHY.body1,
     color: THEME_COLORS.text.primary,
-    fontFamily: 'Poppins-Regular',
   },
   bodyText2: {
     ...TYPOGRAPHY.body2,
-    color: THEME_COLORS.text.secondary,
-    fontFamily: 'Poppins-Regular',
+    color: THEME_COLORS.text.primary,
   },
   caption: {
     ...TYPOGRAPHY.caption,
-    color: THEME_COLORS.text.tertiary,
-    fontFamily: 'Poppins-Regular',
+    color: THEME_COLORS.text.secondary,
   },
-
-  // Button Styles
-  buttonPrimary: {
-    backgroundColor: THEME_COLORS.accent.main,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: 10,
-    ...Platform.select({
-      ios: {
-        shadowColor: THEME_COLORS.accent.main,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4.65,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-  },
-  buttonSecondary: {
-    backgroundColor: 'transparent',
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: THEME_COLORS.accent.main,
-  },
-
-  // Input Styles
-  input: {
-    backgroundColor: THEME_COLORS.background.card,
-    borderRadius: 10,
-    padding: SPACING.md,
+  button: {
+    ...TYPOGRAPHY.button,
     color: THEME_COLORS.text.primary,
-    fontFamily: 'Poppins-Regular',
-    fontSize: TYPOGRAPHY.body1.fontSize,
   },
-
-  // Image Styles
-  roundedImage: {
-    borderRadius: 15,
-    width: '100%',
-    height: undefined,
-    aspectRatio: 1,
+  glassMorphism: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
   },
-  avatar: {
-    width: width * 0.12,
-    height: width * 0.12,
-    borderRadius: width * 0.06,
-    borderWidth: 2,
-    borderColor: THEME_COLORS.secondary.main,
-  },
-
-  // Loading and Error States
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: THEME_COLORS.primary.main,
-  },
-  errorContainer: {
-    padding: SPACING.lg,
-    backgroundColor: THEME_COLORS.danger.main,
-    borderRadius: 10,
-    margin: SPACING.md,
-  },
-
-  // List Styles
-  listContainer: {
-    paddingHorizontal: SPACING.md,
-  },
-  listSeparator: {
-    height: 1,
-    backgroundColor: THEME_COLORS.background.card,
-    marginVertical: SPACING.sm,
-  },
-
-  // Animation Presets
-  fadeIn: {
-    opacity: 1,
-    transform: [{ scale: 1 }],
-  },
-  fadeOut: {
-    opacity: 0,
-    transform: [{ scale: 0.9 }],
-  },
-
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: THEME_COLORS.background.overlay,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: THEME_COLORS.primary.light,
-    borderRadius: 20,
-    padding: SPACING.lg,
-    width: width * 0.9,
-    maxHeight: height * 0.8,
-  },
-
-  // Badge Styles
-  badge: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: THEME_COLORS.danger.main,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  // Enhanced Card Styles
   premiumCard: {
-    backgroundColor: THEME_COLORS.background.card,
-    borderRadius: 20,
-    padding: SPACING.lg,
+    borderColor: 'rgba(255, 215, 0, 0.3)',
     borderWidth: 1,
-    borderColor: 'rgba(255,215,0,0.3)', // Subtle gold border
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
   },
-
-  // Enhanced Input Styles
-  inputFocused: {
-    backgroundColor: THEME_COLORS.background.card,
-    borderRadius: 10,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: THEME_COLORS.secondary.main,
-    transform: [{ scale: 1.02 }],
+  shadow: {
+    shadowColor: THEME_COLORS.shadowColor,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-
-  // Skeleton Loading
-  skeletonLoading: {
-    backgroundColor: THEME_COLORS.background.card,
-    borderRadius: 8,
-    opacity: 0.7,
-  },
-
-  // Enhanced Button Styles
-  buttonIcon: {
-    padding: SPACING.sm,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-  },
-
-  // Status Indicators
-  statusBadge: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Chart Container
-  chartContainer: {
-    padding: SPACING.md,
-    borderRadius: 15,
-    backgroundColor: THEME_COLORS.background.card,
-    marginVertical: SPACING.sm,
-  },
-
-  // Enhanced List Item
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.md,
-    backgroundColor: THEME_COLORS.background.card,
-    borderRadius: 12,
-    marginVertical: SPACING.xs,
-  },
-
-  // Bottom Sheet Styles
-  bottomSheet: {
-    backgroundColor: THEME_COLORS.primary.light,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    padding: SPACING.lg,
-    minHeight: height * 0.3,
-  },
-});
+};
