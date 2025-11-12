@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,7 +8,6 @@ import {
   Alert,
   Dimensions,
   ScrollView,
-  Switch,
   TextInput,
   ActivityIndicator,
   Platform,
@@ -18,17 +17,17 @@ import { signOut } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import * as ImagePicker from "expo-image-picker";
-import * as LocalAuthentication from 'expo-local-authentication';
+
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import { colors, THEME_COLORS, SPACING, TYPOGRAPHY, commonStyles } from "../../global/styles";
+import { colors, THEME_COLORS, commonStyles } from "../../global/styles";
 import { auth, db, storage } from "../../../firebaseConfig";
 import { Fonts } from "../../../assets/fonts/fonts";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import Ionicons from "@expo/vector-icons/Ionicons";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCurrency } from '../../global/CurrencyContext';
 
@@ -46,7 +45,7 @@ const GradientCard = ({ children, colors: gradientColors, style }) => (
 const { width } = Dimensions.get("window");
 
 const Profile = () => {
-  const [imageUri, setImageUri] = useState(null);
+
   const [uploading, setUploading] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [name, setName] = useState("");
@@ -55,60 +54,38 @@ const Profile = () => {
   const { currency: selectedCurrency, updateCurrency, currencies } = useCurrency();
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
-  const [biometricSupported, setBiometricSupported] = useState(false);
+
   const [loading, setLoading] = useState(false);
   
   const navigation = useNavigation();
 
+  // Move useMemo before any early returns to avoid hooks order issues
+  const filteredCurrencies = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return currencies;
+    }
+    
+    const query = searchQuery.toLowerCase().trim();
+    return currencies.filter(currency => 
+      currency.name.toLowerCase().includes(query) ||
+      currency.code.toLowerCase().includes(query) ||
+      currency.symbol.includes(query)
+    );
+  }, [currencies, searchQuery]);
+
   useEffect(() => {
     fetchUserData();
     loadSettings();
-    checkBiometricSupport();
   }, []);
 
-  const checkBiometricSupport = async () => {
-    try {
-      const compatible = await LocalAuthentication.hasHardwareAsync();
-      const enrolled = await LocalAuthentication.isEnrolledAsync();
-      setBiometricSupported(compatible && enrolled);
-    } catch (error) {
-      console.error('Error checking biometric support:', error);
-    }
-  };
 
-  const handleBiometricAuth = async () => {
-    try {
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Authenticate to enable biometric login',
-        fallbackLabel: 'Use passcode',
-      });
-
-      if (result.success) {
-        setBiometricEnabled(true);
-        const settings = {
-          currency: selectedCurrency,
-          notifications: notificationsEnabled,
-          biometric: true
-        };
-        await saveSettings(settings);
-        Alert.alert('Success', 'Biometric login enabled successfully');
-      }
-    } catch (error) {
-      console.error('Biometric auth error:', error);
-      Alert.alert('Error', 'Failed to enable biometric login');
-    }
-  };
 
   const loadSettings = async () => {
     try {
       const settings = await AsyncStorage.getItem('userSettings');
       if (settings) {
-        const { currency, notifications, biometric } = JSON.parse(settings);
+        const { currency } = JSON.parse(settings);
         if (currency) await updateCurrency(currency);
-        setNotificationsEnabled(notifications ?? true);
-        setBiometricEnabled(biometric ?? false);
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -150,8 +127,6 @@ const Profile = () => {
           // Load user settings
           if (userData.settings) {
             await updateCurrency(userData.settings.currency || "USD");
-            setNotificationsEnabled(userData.settings.notifications ?? true);
-            setBiometricEnabled(userData.settings.biometric ?? false);
           }
         }
       }
@@ -171,14 +146,13 @@ const Profile = () => {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
       });
 
       if (!result.canceled) {
-        setImageUri(result.assets[0].uri);
         uploadImage(result.assets[0].uri);
       }
     } catch (error) {
@@ -204,7 +178,6 @@ const Profile = () => {
       Alert.alert("Error", "Failed to upload image");
     } finally {
       setUploading(false);
-      setImageUri(null);
     }
   };
 
@@ -238,48 +211,23 @@ const Profile = () => {
   const handleCurrencyChange = async (currency) => {
     try {
       await updateCurrency(currency);
+      
+      // Save to settings
+      const settings = { currency };
+      await saveSettings(settings);
+      
       setShowCurrencyPicker(false);
-      Alert.alert("Success", "Currency updated successfully");
+      setSearchQuery("");
+      
+      // Provide subtle feedback without intrusive alert
+      console.log(`Currency updated to ${currency}`);
     } catch (error) {
-      Alert.alert("Error", "Failed to update currency");
+      console.error('Error updating currency:', error);
+      Alert.alert("Error", "Failed to update currency. Please try again.");
     }
   };
 
-  const handleDarkModeToggle = async (value) => {
-    // This function is no longer used for dark mode, but kept for consistency
-    // Dark mode is now handled by the app's theme or a separate setting.
-    // For now, we'll just save the currency.
-    const settings = {
-      currency: selectedCurrency,
-      notifications: notificationsEnabled,
-      biometric: biometricEnabled
-    };
-    await saveSettings(settings);
-  };
 
-  const handleNotificationsToggle = async (value) => {
-    setNotificationsEnabled(value);
-    const settings = {
-      currency: selectedCurrency,
-      darkMode: false, // Dark mode is no longer a separate setting
-      notifications: value,
-      biometric: biometricEnabled
-    };
-    await saveSettings(settings);
-  };
-
-  const handleBiometricToggle = async (value) => {
-    // This function is no longer used for biometric login, but kept for consistency
-    // Biometric login is now handled by the handleBiometricAuth function.
-    // For now, we'll just save the currency.
-    const settings = {
-      currency: selectedCurrency,
-      darkMode: false, // Dark mode is no longer a separate setting
-      notifications: notificationsEnabled,
-      biometric: value
-    };
-    await saveSettings(settings);
-  };
 
   const handleLogout = async () => {
     Alert.alert(
@@ -311,13 +259,23 @@ const Profile = () => {
         selectedCurrency === item.code && styles.selectedCurrency,
       ]}
       onPress={() => handleCurrencyChange(item.code)}
+      activeOpacity={0.7}
     >
       <View style={styles.currencyItemContent}>
-        <Text style={styles.currencySymbol}>{item.symbol}</Text>
-        <View style={styles.currencyDetails}>
-          <Text style={styles.currencyCode}>{item.code}</Text>
-          <Text style={styles.currencyName}>{item.name}</Text>
+        <View style={styles.currencyLeft}>
+          <Text style={styles.currencySymbol}>{item.symbol}</Text>
+          <View style={styles.currencyDetails}>
+            <Text style={styles.currencyCode}>{item.code}</Text>
+            <Text style={styles.currencyName}>{item.name}</Text>
+          </View>
         </View>
+        {selectedCurrency === item.code && (
+          <MaterialIcons 
+            name="check-circle" 
+            size={24} 
+            color={colors.white}
+          />
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -325,11 +283,15 @@ const Profile = () => {
   const renderContent = () => {
     if (showCurrencyPicker) {
       return (
-        <View style={styles.container}>
+        <View style={styles.currencyPickerModal}>
           <View style={styles.headerContainer}>
             <TouchableOpacity 
               style={styles.backButton}
-              onPress={() => setShowCurrencyPicker(false)}
+              onPress={() => {
+                setShowCurrencyPicker(false);
+                setSearchQuery("");
+              }}
+              activeOpacity={0.7}
             >
               <MaterialIcons name="arrow-back" size={24} color={colors.white} />
               <Text style={styles.backButtonText}>Back</Text>
@@ -345,16 +307,37 @@ const Profile = () => {
               placeholderTextColor={colors.silver}
               value={searchQuery}
               onChangeText={setSearchQuery}
+              autoCorrect={false}
+              autoCapitalize="none"
             />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity 
+                onPress={() => setSearchQuery("")}
+                style={styles.clearButton}
+              >
+                <MaterialIcons name="clear" size={20} color={colors.silver} />
+              </TouchableOpacity>
+            )}
           </View>
 
-          <FlatList
-            data={filteredCurrencies}
-            renderItem={renderCurrencyItem}
-            keyExtractor={item => item.code}
-            contentContainerStyle={styles.currencyList}
-            showsVerticalScrollIndicator={false}
-          />
+          {filteredCurrencies.length > 0 ? (
+            <FlatList
+              data={filteredCurrencies}
+              renderItem={renderCurrencyItem}
+              keyExtractor={item => item.code}
+              contentContainerStyle={styles.currencyList}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            />
+          ) : (
+            <View style={styles.noResultsContainer}>
+              <MaterialIcons name="search-off" size={48} color={colors.silver} />
+              <Text style={styles.noResultsText}>No currencies found</Text>
+              <Text style={styles.noResultsSubtext}>
+                Try searching with a different term
+              </Text>
+            </View>
+          )}
         </View>
       );
     }
@@ -445,51 +428,7 @@ const Profile = () => {
             </TouchableOpacity>
           </GradientCard>
 
-          {/* Notifications */}
-          <GradientCard style={[styles.card, commonStyles.glassMorphism]}>
-            <View style={styles.settingRow}>
-              <View style={styles.settingLeft}>
-                <Ionicons name="notifications-outline" size={24} color={colors.silver} />
-                <View style={styles.settingTextContainer}>
-                  <Text style={styles.settingTitle}>Notifications</Text>
-                  <Text style={styles.settingSubtitle}>Enable push notifications</Text>
-                </View>
-              </View>
-              <Switch
-                value={notificationsEnabled}
-                onValueChange={handleNotificationsToggle}
-                trackColor={{ false: colors.silver, true: THEME_COLORS.secondary.main }}
-                thumbColor={colors.white}
-              />
-            </View>
-          </GradientCard>
 
-          {/* Biometric Authentication */}
-          {biometricSupported && (
-            <GradientCard style={[styles.card, commonStyles.glassMorphism]}>
-              <View style={styles.settingRow}>
-                <View style={styles.settingLeft}>
-                  <Ionicons name="finger-print" size={24} color={colors.silver} />
-                  <View style={styles.settingTextContainer}>
-                    <Text style={styles.settingTitle}>Biometric Login</Text>
-                    <Text style={styles.settingSubtitle}>
-                      {biometricEnabled ? 'Enabled' : 'Tap to enable fingerprint/face ID'}
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity 
-                  style={styles.biometricButton}
-                  onPress={handleBiometricAuth}
-                >
-                  <MaterialIcons 
-                    name={biometricEnabled ? "check-circle" : "add-circle"} 
-                    size={30} 
-                    color={biometricEnabled ? THEME_COLORS.success.main : colors.silver}
-                  />
-                </TouchableOpacity>
-              </View>
-            </GradientCard>
-          )}
 
           {/* Logout Button */}
           <TouchableOpacity onPress={handleLogout}>
@@ -513,11 +452,6 @@ const Profile = () => {
       </View>
     );
   }
-
-  const filteredCurrencies = currencies.filter(currency => 
-    currency.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    currency.code.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <View style={styles.container}>
@@ -675,12 +609,24 @@ const styles = StyleSheet.create({
     maxHeight: width * 0.6,
   },
   currencyOption: {
-    padding: width * 0.03,
-    borderRadius: width * 0.02,
-    marginBottom: width * 0.01,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: width * 0.03,
+    marginBottom: width * 0.02,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    shadowColor: colors.shadowColor,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   selectedCurrency: {
     backgroundColor: THEME_COLORS.secondary.main,
+    borderColor: THEME_COLORS.secondary.light,
+    borderWidth: 2,
   },
   currencyOptionText: {
     fontSize: Math.min(width * 0.035, 16),
@@ -714,10 +660,12 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.richBlack,
-    borderRadius: width * 0.02,
-    padding: width * 0.02,
-    marginBottom: width * 0.02,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: width * 0.03,
+    padding: width * 0.04,
+    margin: width * 0.04,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   searchInput: {
     flex: 1,
@@ -727,41 +675,56 @@ const styles = StyleSheet.create({
     marginLeft: width * 0.02,
   },
   currencyList: {
-    maxHeight: width * 0.6,
+    paddingHorizontal: width * 0.04,
+    paddingBottom: width * 0.04,
   },
   currencyItemContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: width * 0.04,
+    justifyContent: 'space-between',
+  },
+  currencyLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   currencySymbol: {
-    fontSize: Math.min(width * 0.05, 24),
+    fontSize: Math.min(width * 0.06, 28),
     color: colors.white,
-    fontFamily: Fonts.POPPINS_SEMIBOLD,
-    width: width * 0.1,
+    fontFamily: Fonts.POPPINS_BOLD,
+    width: width * 0.12,
     textAlign: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: width * 0.02,
+    paddingVertical: width * 0.02,
   },
   currencyDetails: {
-    marginLeft: width * 0.03,
+    marginLeft: width * 0.04,
+    flex: 1,
   },
   currencyCode: {
-    fontSize: Math.min(width * 0.035, 16),
+    fontSize: Math.min(width * 0.04, 18),
     color: colors.white,
     fontFamily: Fonts.POPPINS_SEMIBOLD,
+    marginBottom: width * 0.005,
   },
   currencyName: {
-    fontSize: Math.min(width * 0.03, 14),
+    fontSize: Math.min(width * 0.032, 15),
     color: colors.silver,
     fontFamily: Fonts.POPPINS_REGULAR,
+    lineHeight: Math.min(width * 0.045, 20),
   },
-  biometricButton: {
-    padding: width * 0.02,
-  },
+
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: width * 0.04,
+    paddingHorizontal: width * 0.04,
+    paddingVertical: width * 0.04,
+    paddingTop: Platform.OS === 'ios' ? width * 0.12 : width * 0.04,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: THEME_COLORS.primary.main,
   },
   backButton: {
     flexDirection: 'row',
@@ -779,6 +742,35 @@ const styles = StyleSheet.create({
     fontSize: Math.min(width * 0.05, 20),
     fontFamily: Fonts.POPPINS_SEMIBOLD,
     flex: 1,
+    textAlign: 'center',
+    marginRight: width * 0.1, // Balance the back button
+  },
+  currencyPickerModal: {
+    flex: 1,
+    backgroundColor: colors.richBlack,
+  },
+  clearButton: {
+    padding: width * 0.01,
+    marginLeft: width * 0.02,
+  },
+  noResultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: width * 0.08,
+  },
+  noResultsText: {
+    fontSize: Math.min(width * 0.045, 18),
+    color: colors.white,
+    fontFamily: Fonts.POPPINS_MEDIUM,
+    marginTop: width * 0.04,
+    textAlign: 'center',
+  },
+  noResultsSubtext: {
+    fontSize: Math.min(width * 0.035, 14),
+    color: colors.silver,
+    fontFamily: Fonts.POPPINS_REGULAR,
+    marginTop: width * 0.02,
     textAlign: 'center',
   },
 });
