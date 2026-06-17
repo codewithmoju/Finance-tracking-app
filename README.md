@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./assets/readme/hero-banner.svg" alt="BudgetO Hero Banner" width="100%" />
+
 # 💸 BudgetO
 
 ### Premium Personal Finance Tracking App
@@ -15,6 +17,7 @@ Built with **React Native**, **Expo**, **Firebase Authentication**, **Cloud Fire
 ## Table of Contents
 
 - [Overview](#overview)
+- [App Showcase](#app-showcase)
 - [Problem Statement](#problem-statement)
 - [Core Features](#core-features)
 - [Tech Stack](#tech-stack)
@@ -54,6 +57,14 @@ BudgetO is built as a real-world React Native project with Firebase backend serv
 
 ---
 
+## App Showcase
+
+<img src="./assets/readme/app-showcase.svg" alt="BudgetO App Showcase" width="100%" />
+
+BudgetO is designed around a polished fintech experience with separate flows for dashboard overview, expense tracking, income tracking, financial insights, and profile/settings management.
+
+---
+
 ## Problem Statement
 
 Most students, freelancers, and young professionals lose control of their money because they do not track small expenses, income sources, or category-wise spending patterns.
@@ -71,6 +82,8 @@ BudgetO solves this by giving users:
 ---
 
 ## Core Features
+
+<img src="./assets/readme/feature-grid.svg" alt="BudgetO Feature Grid" width="100%" />
 
 ### Authentication
 
@@ -139,17 +152,6 @@ BudgetO solves this by giving users:
 - Select preferred currency.
 - Logout and clear local storage.
 
-### UX Enhancements
-
-- Haptic feedback.
-- Animated bottom tab bar.
-- Gradient-based design system.
-- Glassmorphism-style cards.
-- Loading states.
-- Empty states.
-- Error states.
-- Safe area support.
-
 ---
 
 ## Tech Stack
@@ -211,42 +213,23 @@ BudgetO solves this by giving users:
 
 ## System Architecture
 
+<img src="./assets/readme/architecture-diagram.svg" alt="BudgetO Architecture Diagram" width="100%" />
+
 ```text
-┌──────────────────────────────────────────────┐
-│                 Mobile App                   │
-│              React Native + Expo              │
-└───────────────────────┬──────────────────────┘
-                        │
-                        ▼
-┌──────────────────────────────────────────────┐
-│               Navigation Layer                │
-│    Root Navigator / Auth Stack / Main Tabs     │
-└───────────────────────┬──────────────────────┘
-                        │
-                        ▼
-┌──────────────────────────────────────────────┐
-│              Presentation Layer               │
-│     Screens, Cards, Modals, Forms, Charts      │
-└───────────────────────┬──────────────────────┘
-                        │
-                        ▼
-┌──────────────────────────────────────────────┐
-│              Business Logic Layer             │
-│ Filters, AI Suggestions, Insights, Validation  │
-└───────────────────────┬──────────────────────┘
-                        │
-                        ▼
-┌──────────────────────────────────────────────┐
-│                 Data Layer                    │
-│      Firebase Auth + Firestore + Storage       │
-└───────────────────────┬──────────────────────┘
-                        │
-                        ▼
-┌──────────────────────────────────────────────┐
-│             Local Persistence                 │
-│     AsyncStorage: settings, currency, cache     │
-└──────────────────────────────────────────────┘
+Mobile App
+  ↓
+Navigation Layer
+  ↓
+Presentation Layer
+  ↓
+Business Logic Layer
+  ↓
+Firebase Auth + Firestore + Storage
+  ↓
+AsyncStorage Local Persistence
 ```
+
+BudgetO follows a mobile-first layered architecture. The UI is separated through navigation stacks, screen modules, reusable components, global styles, currency context, and Firebase-backed data operations.
 
 ---
 
@@ -302,8 +285,6 @@ BudgetO uses Cloud Firestore as the main database.
 
 ### users
 
-Stores user profile and settings.
-
 ```text
 users/{userId}
 ├── username
@@ -317,8 +298,6 @@ users/{userId}
 ```
 
 ### transactions
-
-Stores expense records.
 
 ```text
 transactions/{transactionId}
@@ -341,8 +320,6 @@ transactions/{transactionId}
 
 ### categories
 
-Stores expense categories.
-
 ```text
 categories/{categoryId}
 ├── userId
@@ -355,8 +332,6 @@ categories/{categoryId}
 ```
 
 ### income
-
-Stores income records.
 
 ```text
 income/{incomeId}
@@ -374,8 +349,6 @@ income/{incomeId}
 
 ### incomeCategories
 
-Stores income categories.
-
 ```text
 incomeCategories/{categoryId}
 ├── userId
@@ -387,8 +360,6 @@ incomeCategories/{categoryId}
 ```
 
 ### Firebase Storage
-
-Stores user profile pictures.
 
 ```text
 profile_pictures/{userId}.jpg
@@ -535,26 +506,7 @@ BudgetO analyzes income data to calculate:
 
 ## Currency System
 
-BudgetO includes a global currency provider.
-
-Supported examples:
-
-- USD
-- EUR
-- GBP
-- PKR
-- INR
-- AED
-- SAR
-- JPY
-- AUD
-- CAD
-- CNY
-- TRY
-- BDT
-- and more
-
-### Currency Flow
+BudgetO includes a global currency provider with support for currencies such as USD, EUR, GBP, PKR, INR, AED, SAR, JPY, AUD, CAD, CNY, TRY, BDT, and more.
 
 ```text
 App starts
@@ -575,6 +527,8 @@ formatAmount() displays values with currency symbols
 ---
 
 ## AI-Style Financial Intelligence
+
+<img src="./assets/readme/finance-intelligence.svg" alt="BudgetO Finance Intelligence Diagram" width="100%" />
 
 BudgetO includes intelligent helper logic for financial interpretation.
 
@@ -623,7 +577,13 @@ The profile module supports:
 ```text
 Finance-tracking-app/
 ├── assets/
-│   └── fonts/
+│   ├── fonts/
+│   └── readme/
+│       ├── hero-banner.svg
+│       ├── app-showcase.svg
+│       ├── architecture-diagram.svg
+│       ├── finance-intelligence.svg
+│       └── feature-grid.svg
 │
 ├── src/
 │   ├── Components/
@@ -638,40 +598,12 @@ Finance-tracking-app/
 │   │
 │   └── Screens/
 │       ├── AuthScreens/
-│       │   ├── SplashScreen
-│       │   ├── Login
-│       │   ├── SignUp
-│       │   ├── EmailVerification
-│       │   └── ForgotPasswrd
-│       │
 │       ├── HomeScreen/
-│       │   └── Home.js
-│       │
 │       ├── TransactionScreens/
-│       │   ├── Transactions
-│       │   ├── AddTransaction
-│       │   ├── EditTransaction
-│       │   └── Categories
-│       │
 │       ├── BudgetScreen/
-│       │   ├── Income
-│       │   ├── AddIncome
-│       │   ├── EditIncome
-│       │   └── IncomeCategories
-│       │
 │       ├── InsightScreens/
-│       │   └── Insights
-│       │
 │       ├── ProfileScreens/
-│       │   └── Profile
-│       │
 │       └── Navigations/
-│           ├── RootNavigator
-│           ├── AuthStack
-│           ├── BottomTab
-│           ├── TransactionStack
-│           ├── IncomeStack
-│           └── ProfileStack
 │
 ├── App.js
 ├── firebaseConfig.js
@@ -685,97 +617,35 @@ Finance-tracking-app/
 
 ### App.js
 
-Main app entry wrapper.
-
-Responsibilities:
-
-- Wraps the app with `SafeAreaProvider`.
-- Initializes gesture handling.
-- Provides global currency state.
-- Mounts navigation.
-- Applies global status bar styling.
+Main app entry wrapper. It initializes the safe-area provider, gesture handling, currency provider, navigation container, and global status bar.
 
 ### RootNavigator
 
-Controls authentication-based routing.
-
-Responsibilities:
-
-- Listens to Firebase auth state.
-- Shows AuthStack for unauthenticated users.
-- Shows BottomTab for authenticated users.
+Controls authentication-based routing by listening to Firebase auth state and switching between AuthStack and BottomTab.
 
 ### BottomTab
 
-Main app navigation shell.
-
-Responsibilities:
-
-- Shows Home, Transactions, Income, and Profile tabs.
-- Uses a custom animated tab bar.
-- Adds haptic feedback on tab change.
+Main app navigation shell with a custom animated tab bar, haptic feedback, and routes for Home, Transactions, Income, and Profile.
 
 ### Home
 
-Financial dashboard screen.
-
-Responsibilities:
-
-- Shows greeting and date.
-- Displays current balance card.
-- Shows financial insights.
-- Fetches recent transactions.
-- Opens transaction details modal.
+Financial dashboard screen for greeting, balance display, financial insight cards, recent transactions, and quick actions.
 
 ### Transactions
 
-Expense list and management screen.
-
-Responsibilities:
-
-- Fetches expense transactions.
-- Fetches categories.
-- Joins transaction records with category color/name.
-- Supports search and filters.
-- Supports delete and edit flows.
-- Generates spending insights.
+Expense list and management screen for Firestore transaction fetching, category joining, filtering, searching, editing, deleting, and spending insights.
 
 ### AddTransaction
 
-Expense creation screen.
-
-Responsibilities:
-
-- Validates amount, description, category, and currency.
-- Suggests categories from description.
-- Supports quick-add from recent transactions.
-- Creates category if missing.
-- Creates transaction using Firestore batch writes.
+Expense creation screen with validation, quick-add, smart category suggestions, new category creation, and Firestore batch writes.
 
 ### Income
 
-Income list and management screen.
-
-Responsibilities:
-
-- Fetches income records.
-- Fetches income categories.
-- Supports filtering and searching.
-- Shows income cards.
-- Generates income insights.
+Income management screen for income records, categories, filters, search, income analytics, and income detail modals.
 
 ### Profile
 
-User profile and settings screen.
-
-Responsibilities:
-
-- Fetches user profile.
-- Updates username.
-- Uploads profile image.
-- Updates currency.
-- Saves settings locally and remotely.
-- Handles logout.
+User profile and settings screen for profile data, image upload, username update, currency selection, and logout.
 
 ---
 
@@ -831,43 +701,15 @@ Common methods:
 
 BudgetO includes several design and performance practices:
 
-### Memoization
-
-Uses:
-
 - `useMemo()` for filtered lists and derived values.
 - `useCallback()` for Firestore fetch handlers and event handlers.
 - `React.memo()` for reusable cards and screens.
-
-### Animated UI
-
-Uses React Native Animated and Reanimated patterns for:
-
-- Dashboard entrance animation.
-- Animated tab icons.
-- Animated headers.
-- Smooth screen transitions.
-
-### Haptic Feedback
-
-Uses Expo Haptics for:
-
-- Tab switching.
-- Button presses.
-- Success feedback.
-- Error feedback.
-
-### Better Mobile UX
-
-Includes:
-
+- React Native Animated and Reanimated for smooth UI effects.
+- Expo Haptics for tactile mobile feedback.
 - Keyboard-aware forms.
 - Safe area handling.
-- Loading indicators.
-- Empty states.
-- Retry states.
-- Gradient cards.
-- Glassmorphism UI patterns.
+- Loading, empty, retry, and error states.
+- Gradient cards and glassmorphism UI patterns.
 
 ---
 
