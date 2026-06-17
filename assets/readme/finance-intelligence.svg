@@ -1,55 +1,81 @@
 <svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="720"><stop stop-color="#060E1B"/><stop offset="1" stop-color="#1B0B37"/></linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#37E8FF"/><stop offset="0.5" stop-color="#7868FF"/><stop offset="1" stop-color="#C33CFF"/></linearGradient>
-    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFFFFF" stop-opacity="0.18"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0.06"/></linearGradient>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#76DFFF"/></marker>
-    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="10" result="blur"/><feBlend in="SourceGraphic" in2="blur"/></filter>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="720">
+      <stop stop-color="#060E1B"/>
+      <stop offset="1" stop-color="#1B0B37"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#37E8FF"/>
+      <stop offset="0.5" stop-color="#7868FF"/>
+      <stop offset="1" stop-color="#C33CFF"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.06"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#76DFFF"/>
+    </marker>
   </defs>
+
   <rect width="1280" height="720" rx="36" fill="url(#bg)"/>
   <circle cx="640" cy="360" r="270" fill="#7568FF" opacity="0.08"/>
-  <text x="640" y="78" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial" font-size="42" font-weight="900">AI-Style Finance Intelligence</text>
-  <text x="640" y="115" text-anchor="middle" fill="#AFC7FF" font-family="Inter, Arial" font-size="19">Rule-based analysis for categories, spending behavior, income sources, and recommendations</text>
+  <circle cx="180" cy="120" r="150" fill="#37E8FF" opacity="0.08"/>
+  <circle cx="1110" cy="610" r="190" fill="#C33CFF" opacity="0.10"/>
+
+  <text x="640" y="78" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="42" font-weight="900">BudgetO Finance Intelligence</text>
+  <text x="640" y="115" text-anchor="middle" fill="#AFC7FF" font-family="Arial, sans-serif" font-size="19">Rule-based analysis for categories, spending behavior, income sources, and recommendations</text>
+
   <g transform="translate(70 255)">
     <rect width="180" height="150" rx="28" fill="url(#card)" stroke="#FFFFFF" stroke-opacity="0.14"/>
-    <text x="90" y="63" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Inter, Arial">Transactions</text>
-    <text x="90" y="97" text-anchor="middle" fill="#AFC7FF" font-size="15" font-family="Inter, Arial">Expenses</text>
-    <text x="90" y="121" text-anchor="middle" fill="#AFC7FF" font-size="15" font-family="Inter, Arial">Income Entries</text>
+    <text x="90" y="63" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Arial, sans-serif">Transactions</text>
+    <text x="90" y="97" text-anchor="middle" fill="#AFC7FF" font-size="15" font-family="Arial, sans-serif">Expenses</text>
+    <text x="90" y="121" text-anchor="middle" fill="#AFC7FF" font-size="15" font-family="Arial, sans-serif">Income Entries</text>
   </g>
+
   <g transform="translate(300 255)">
     <rect width="180" height="150" rx="28" fill="url(#card)" stroke="#FFFFFF" stroke-opacity="0.14"/>
-    <text x="90" y="54" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Inter, Arial">Category</text>
-    <text x="90" y="82" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Inter, Arial">Analysis</text>
-    <text x="90" y="118" text-anchor="middle" fill="#AFC7FF" font-size="15" font-family="Inter, Arial">Smart Matching</text>
+    <text x="90" y="54" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Arial, sans-serif">Category</text>
+    <text x="90" y="82" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Arial, sans-serif">Analysis</text>
+    <text x="90" y="118" text-anchor="middle" fill="#AFC7FF" font-size="15" font-family="Arial, sans-serif">Smart Matching</text>
   </g>
+
   <g transform="translate(550 235)">
-    <rect width="180" height="190" rx="32" fill="url(#accent)" filter="url(#glow)"/>
-    <text x="90" y="62" text-anchor="middle" fill="#FFFFFF" font-size="25" font-weight="900" font-family="Inter, Arial">Finance</text>
-    <text x="90" y="94" text-anchor="middle" fill="#FFFFFF" font-size="25" font-weight="900" font-family="Inter, Arial">Engine</text>
+    <rect width="180" height="190" rx="32" fill="url(#accent)"/>
+    <text x="90" y="62" text-anchor="middle" fill="#FFFFFF" font-size="25" font-weight="900" font-family="Arial, sans-serif">Finance</text>
+    <text x="90" y="94" text-anchor="middle" fill="#FFFFFF" font-size="25" font-weight="900" font-family="Arial, sans-serif">Engine</text>
     <circle cx="90" cy="133" r="28" fill="#FFFFFF" fill-opacity="0.18"/>
     <path d="M78 136L86 144L104 121" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
+
   <g transform="translate(800 255)">
     <rect width="180" height="150" rx="28" fill="url(#card)" stroke="#FFFFFF" stroke-opacity="0.14"/>
-    <text x="90" y="54" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Inter, Arial">Spending</text>
-    <text x="90" y="82" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Inter, Arial">Insights</text>
-    <text x="90" y="118" text-anchor="middle" fill="#AFC7FF" font-size="15" font-family="Inter, Arial">Trends & Patterns</text>
+    <text x="90" y="54" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Arial, sans-serif">Spending</text>
+    <text x="90" y="82" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Arial, sans-serif">Insights</text>
+    <text x="90" y="118" text-anchor="middle" fill="#AFC7FF" font-size="15" font-family="Arial, sans-serif">Trends and Patterns</text>
   </g>
+
   <g transform="translate(1030 255)">
     <rect width="180" height="150" rx="28" fill="url(#card)" stroke="#FFFFFF" stroke-opacity="0.14"/>
-    <text x="90" y="54" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Inter, Arial">Financial</text>
-    <text x="90" y="82" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Inter, Arial">Actions</text>
-    <text x="90" y="118" text-anchor="middle" fill="#AFC7FF" font-size="15" font-family="Inter, Arial">Recommendations</text>
+    <text x="90" y="54" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Arial, sans-serif">Financial</text>
+    <text x="90" y="82" text-anchor="middle" fill="#FFFFFF" font-size="23" font-weight="800" font-family="Arial, sans-serif">Actions</text>
+    <text x="90" y="118" text-anchor="middle" fill="#AFC7FF" font-size="15" font-family="Arial, sans-serif">Recommendations</text>
   </g>
+
   <path d="M250 330H300" stroke="#76DFFF" stroke-width="4" marker-end="url(#arrow)"/>
   <path d="M480 330H550" stroke="#76DFFF" stroke-width="4" marker-end="url(#arrow)"/>
   <path d="M730 330H800" stroke="#76DFFF" stroke-width="4" marker-end="url(#arrow)"/>
   <path d="M980 330H1030" stroke="#76DFFF" stroke-width="4" marker-end="url(#arrow)"/>
+
   <g transform="translate(155 505)">
     <rect width="970" height="88" rx="28" fill="url(#card)" stroke="#FFFFFF" stroke-opacity="0.12"/>
-    <text x="60" y="55" fill="#37E8FF" font-size="18" font-weight="800" font-family="Inter, Arial">01</text><text x="105" y="55" fill="#FFFFFF" font-size="18" font-weight="700" font-family="Inter, Arial">Top categories</text>
-    <text x="290" y="55" fill="#37E8FF" font-size="18" font-weight="800" font-family="Inter, Arial">02</text><text x="335" y="55" fill="#FFFFFF" font-size="18" font-weight="700" font-family="Inter, Arial">Growth rate</text>
-    <text x="500" y="55" fill="#37E8FF" font-size="18" font-weight="800" font-family="Inter, Arial">03</text><text x="545" y="55" fill="#FFFFFF" font-size="18" font-weight="700" font-family="Inter, Arial">Recurring patterns</text>
-    <text x="760" y="55" fill="#37E8FF" font-size="18" font-weight="800" font-family="Inter, Arial">04</text><text x="805" y="55" fill="#FFFFFF" font-size="18" font-weight="700" font-family="Inter, Arial">Budget guidance</text>
+    <text x="60" y="55" fill="#37E8FF" font-size="18" font-weight="800" font-family="Arial, sans-serif">01</text>
+    <text x="105" y="55" fill="#FFFFFF" font-size="18" font-weight="700" font-family="Arial, sans-serif">Top categories</text>
+    <text x="290" y="55" fill="#37E8FF" font-size="18" font-weight="800" font-family="Arial, sans-serif">02</text>
+    <text x="335" y="55" fill="#FFFFFF" font-size="18" font-weight="700" font-family="Arial, sans-serif">Growth rate</text>
+    <text x="500" y="55" fill="#37E8FF" font-size="18" font-weight="800" font-family="Arial, sans-serif">03</text>
+    <text x="545" y="55" fill="#FFFFFF" font-size="18" font-weight="700" font-family="Arial, sans-serif">Recurring patterns</text>
+    <text x="760" y="55" fill="#37E8FF" font-size="18" font-weight="800" font-family="Arial, sans-serif">04</text>
+    <text x="805" y="55" fill="#FFFFFF" font-size="18" font-weight="700" font-family="Arial, sans-serif">Budget guidance</text>
   </g>
 </svg>
