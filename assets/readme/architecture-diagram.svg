@@ -1,0 +1,52 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="720"><stop stop-color="#07111F"/><stop offset="1" stop-color="#170A35"/></linearGradient>
+    <linearGradient id="node" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFFFFF" stop-opacity="0.18"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0.05"/></linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#37E8FF"/><stop offset="0.55" stop-color="#7568FF"/><stop offset="1" stop-color="#C33CFF"/></linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#76DFFF"/></marker>
+    <filter id="shadow"><feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000" flood-opacity="0.35"/></filter>
+  </defs>
+  <rect width="1280" height="720" rx="36" fill="url(#bg)"/>
+  <text x="640" y="74" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial" font-size="42" font-weight="900">BudgetO System Architecture</text>
+  <text x="640" y="112" text-anchor="middle" fill="#AFC7FF" font-family="Inter, Arial" font-size="19">React Native frontend connected to Firebase backend services</text>
+  <g filter="url(#shadow)">
+    <rect x="80" y="180" width="250" height="130" rx="26" fill="url(#node)" stroke="#FFFFFF" stroke-opacity="0.15"/>
+    <text x="205" y="228" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial" font-size="25" font-weight="800">Mobile App</text>
+    <text x="205" y="263" text-anchor="middle" fill="#AFC7FF" font-family="Inter, Arial" font-size="16">React Native + Expo</text>
+    <text x="205" y="287" text-anchor="middle" fill="#7FDFFF" font-family="Inter, Arial" font-size="14">Dashboard • Forms • UI</text>
+    <rect x="390" y="180" width="250" height="130" rx="26" fill="url(#node)" stroke="#FFFFFF" stroke-opacity="0.15"/>
+    <text x="515" y="228" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial" font-size="25" font-weight="800">Navigation</text>
+    <text x="515" y="263" text-anchor="middle" fill="#AFC7FF" font-family="Inter, Arial" font-size="16">Root • Auth • Tabs</text>
+    <text x="515" y="287" text-anchor="middle" fill="#7FDFFF" font-family="Inter, Arial" font-size="14">React Navigation</text>
+    <rect x="700" y="180" width="250" height="130" rx="26" fill="url(#node)" stroke="#FFFFFF" stroke-opacity="0.15"/>
+    <text x="825" y="228" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial" font-size="25" font-weight="800">Business Logic</text>
+    <text x="825" y="263" text-anchor="middle" fill="#AFC7FF" font-family="Inter, Arial" font-size="16">Filters • Insights • Validation</text>
+    <text x="825" y="287" text-anchor="middle" fill="#7FDFFF" font-family="Inter, Arial" font-size="14">Finance Engine</text>
+    <rect x="1010" y="180" width="190" height="130" rx="26" fill="url(#node)" stroke="#FFFFFF" stroke-opacity="0.15"/>
+    <text x="1105" y="228" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial" font-size="25" font-weight="800">Context</text>
+    <text x="1105" y="263" text-anchor="middle" fill="#AFC7FF" font-family="Inter, Arial" font-size="16">Currency</text>
+    <text x="1105" y="287" text-anchor="middle" fill="#7FDFFF" font-family="Inter, Arial" font-size="14">Global State</text>
+  </g>
+  <path d="M330 245H390" stroke="#76DFFF" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M640 245H700" stroke="#76DFFF" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M950 245H1010" stroke="#76DFFF" stroke-width="3" marker-end="url(#arrow)"/>
+  <g filter="url(#shadow)">
+    <rect x="185" y="420" width="220" height="130" rx="26" fill="url(#node)" stroke="#FFFFFF" stroke-opacity="0.15"/>
+    <text x="295" y="468" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial" font-size="24" font-weight="800">Firebase Auth</text>
+    <text x="295" y="503" text-anchor="middle" fill="#AFC7FF" font-family="Inter, Arial" font-size="16">Login • Signup</text>
+    <text x="295" y="527" text-anchor="middle" fill="#7FDFFF" font-family="Inter, Arial" font-size="14">Email Verification</text>
+    <rect x="530" y="420" width="220" height="130" rx="26" fill="url(#node)" stroke="#FFFFFF" stroke-opacity="0.15"/>
+    <text x="640" y="468" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial" font-size="24" font-weight="800">Cloud Firestore</text>
+    <text x="640" y="503" text-anchor="middle" fill="#AFC7FF" font-family="Inter, Arial" font-size="16">Users • Income</text>
+    <text x="640" y="527" text-anchor="middle" fill="#7FDFFF" font-family="Inter, Arial" font-size="14">Transactions • Categories</text>
+    <rect x="875" y="420" width="220" height="130" rx="26" fill="url(#node)" stroke="#FFFFFF" stroke-opacity="0.15"/>
+    <text x="985" y="468" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial" font-size="24" font-weight="800">Firebase Storage</text>
+    <text x="985" y="503" text-anchor="middle" fill="#AFC7FF" font-family="Inter, Arial" font-size="16">Profile Pictures</text>
+    <text x="985" y="527" text-anchor="middle" fill="#7FDFFF" font-family="Inter, Arial" font-size="14">Media Uploads</text>
+  </g>
+  <path d="M515 310C515 360 295 360 295 420" stroke="#8C7CFF" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M825 310C825 370 640 370 640 420" stroke="#8C7CFF" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M1105 310C1105 370 985 370 985 420" stroke="#8C7CFF" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="300" y="602" width="680" height="54" rx="27" fill="url(#accent)" opacity="0.94"/>
+  <text x="640" y="637" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial" font-size="18" font-weight="800">Secure cloud-backed personal finance experience with local settings persistence</text>
+</svg>
